@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using firefly_iii_odata.Crypto;
 using firefly_iii_odata.Data;
 using firefly_iii_odata.Models;
@@ -15,6 +16,8 @@ var connectionString = builder.Configuration.GetConnectionString("Firefly");
 var serverVersion = ServerVersion.AutoDetect(connectionString);
 
 var appKey = builder.Configuration["AppKey"] ?? throw new Exception("No AppKey found in configuration");
+
+builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
 builder.Services.AddDbContext<FireflyContext>(
@@ -35,6 +38,8 @@ builder.Services.AddDbContext<FireflyContext>(
 builder.Services.AddSingleton<RsaSecurityKey>(provider =>
 {
     var db = provider.GetRequiredService<FireflyContext>();
+    // var logger = provider.GetRequiredService<ILogger>();
+    // logger.LogInformation("Using app key {AppKey}", appKey);
     var privateKeyLoader = new RsaSecurityKeyLoader(new firefly_iii_odata.Config.AppKeyHolder { AppKey = appKey }, db);
     return privateKeyLoader.LoadKey();
 });
@@ -45,28 +50,30 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
-builder.Services.AddAuthentication().AddJwtBearer(options =>
-{
-    SecurityKey rsa = builder.Services.BuildServiceProvider().GetRequiredService<RsaSecurityKey>();
-    // options.Audience = "1";
-    options.IncludeErrorDetails = true;
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+builder.Services
+    .AddAuthentication()
+    .AddJwtBearer(options =>
     {
-        ValidAudience = "https://firefly2.exultantsoftware.com",
-        ValidIssuer = "https://firefly2.exultantsoftware.com",
-        IssuerSigningKey = rsa,
-        RequireSignedTokens = true,
-        RequireExpirationTime = true,
-        ValidateLifetime = true,
-        ValidateAudience = false,
-        ValidateIssuer = false,
-    };
-});
+        SecurityKey rsa = builder.Services.BuildServiceProvider().GetRequiredService<RsaSecurityKey>();
+        // options.Audience = "1";
+        options.RequireHttpsMetadata = false;
+        options.IncludeErrorDetails = true;
+
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            IssuerSigningKey = rsa,
+            RequireSignedTokens = true,
+            RequireExpirationTime = true,
+            ValidateLifetime = true,
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            NameClaimType = ClaimTypes.NameIdentifier
+        };
+    });
 
 builder
     .Services
     .AddControllers()
-    // .AddMvcOptions(opt => opt.Filters.Add())
     .AddOData(opt =>
     {
         opt.AddRouteComponents("odata", GetEdmModel())
@@ -82,6 +89,8 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<BasicAuthTranslator>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -97,7 +106,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run("http://localhost:6001");
+app.Run();
 
 IEdmModel GetEdmModel()
 {
