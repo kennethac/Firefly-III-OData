@@ -20,30 +20,32 @@ public class BasicAuthTranslator
 {
     private static readonly Regex BasicExtractor = new Regex("Basic (.*)");
     private readonly RequestDelegate _next;
+    private readonly ILogger<BasicAuthTranslator> _logger;
 
-    public BasicAuthTranslator(RequestDelegate next)
+    public BasicAuthTranslator(RequestDelegate next, ILogger<BasicAuthTranslator> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // var authHeader = context.Request.Headers.Authorization;
-        var headerNames = context.Request.Headers.Keys;
-        Console.WriteLine($"All Keys: {string.Join(";", headerNames)}");
-        foreach (var n in headerNames)
-        {
-            Console.WriteLine($"{n}: {context.Request.Headers[n]}");
-        }
         var authHeader = context.Request.Headers.Authorization;
         if (authHeader.Count > 0
             && authHeader[0] is not null
             && BasicExtractor.Match(authHeader[0]!) is { Success: true, Groups: { Count: > 1 } groups })
         {
             var basicValue = groups[1].Value;
-            var token = Encoding.UTF8.GetString(Convert.FromBase64String(basicValue))[..^1]; // Have to remove the trailing ';'
+            _logger.LogDebug($"Got basic auth value {basicValue}", basicValue);
+            var token = Encoding.UTF8.GetString(Convert.FromBase64String(basicValue));
+            token = token.Split(':')[0];
             context.Request.Headers.Remove("Authorization");
             context.Request.Headers.Authorization = $"Bearer {token}";
+            _logger.LogDebug("Setting authorization header to {Bearer}", $"Bearer {token}");
+        }
+        else
+        {
+            _logger.LogDebug("Didn't get a match, not mapping auth headers.");
         }
 
         await _next(context).ConfigureAwait(false);
