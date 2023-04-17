@@ -7,13 +7,17 @@ namespace firefly_iii_odata.Data;
 
 public partial class FireflyContext : DbContext
 {
-    public FireflyContext()
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public FireflyContext(IHttpContextAccessor httpContextAccessor)
     {
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    public FireflyContext(DbContextOptions<FireflyContext> options)
+    public FireflyContext(IHttpContextAccessor httpContextAccessor, DbContextOptions<FireflyContext> options)
         : base(options)
     {
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public virtual DbSet<Account> Accounts { get; set; }

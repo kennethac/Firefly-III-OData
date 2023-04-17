@@ -2,6 +2,7 @@ using System.Security.Claims;
 using firefly_iii_odata.Crypto;
 using firefly_iii_odata.Data;
 using firefly_iii_odata.Models;
+using firefly_iii_odata.Models.Formatted;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
@@ -111,11 +112,14 @@ app.Run();
 IEdmModel GetEdmModel()
 {
     var builder = new ODataConventionModelBuilder();
-    builder.EntitySet<Budget>("Budgets");
-    builder.EntitySet<Transaction>("Transactions");
-    builder.EntitySet<BudgetLimit>("BudgetLimits");
-    builder.EntitySet<Account>("Accounts");
-    builder.EntitySet<AccountType>("AccountTypes");
-    builder.EntitySet<TransactionType>("TransactionTypes");
+    builder.EntitySet<Budget>("RawBudgets");
+    builder.EntitySet<Transaction>("RawTransactions");
+    builder.EntitySet<BudgetLimit>("RawBudgetLimits");
+    builder.EntitySet<Account>("Rawccounts");
+    builder.EntitySet<AccountType>("RawAccountTypes");
+    builder.EntitySet<TransactionType>("RawTransactionTypes");
+    builder.EntitySet<FormattedTransaction>("Transactions");
+    builder.EntitySet<FormattedAccount>("Accounts");
+    builder.EntitySet<FormattedBudgetLimit>("BudgetLimits");
     return builder.GetEdmModel();
 }

@@ -1,7 +1,6 @@
-using System.Security.Claims;
 using firefly_iii_odata.Data;
 using firefly_iii_odata.Extensions;
-using firefly_iii_odata.Models;
+using firefly_iii_odata.Models.Formatted;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 
@@ -10,17 +9,30 @@ namespace firefly_iii_odata.Controllers;
 public class AccountsController : ODataController
 {
     private readonly FireflyContext _dbContext;
-    private readonly ILogger<AccountsController> _logger;
+    private readonly ILogger<RawAccountsController> _logger;
 
-    public AccountsController(FireflyContext dbContext, ILogger<AccountsController> logger)
+    public AccountsController(FireflyContext dbContext, ILogger<RawAccountsController> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
     }
 
     [EnableQuery]
-    public IQueryable<Account> Get()
+    public IQueryable<FormattedAccount> Get()
     {
-        return _dbContext.Accounts.Where(a => a.UserId == HttpContext.FireflyUserId());
+        return _dbContext
+            .Accounts
+            .Where(a => a.UserId == HttpContext.FireflyUserId())
+            .Select(a => new FormattedAccount
+            {
+                AccountType = a.AccountType.Type,
+                AccountTypeId = a.AccountTypeId,
+                Active = a.Active,
+                Id = a.Id,
+                VirtualBalance = a.VirtualBalance,
+                Name = a.Name,
+                Order = a.Order,
+                CurrentBalance = a.Transactions.Sum(t => t.Amount)
+            });
     }
 }
