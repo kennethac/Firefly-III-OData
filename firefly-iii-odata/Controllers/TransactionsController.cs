@@ -37,7 +37,9 @@ public class TransactionsController : ODataController
                 SourceAccountName = j.Transactions.First(t => t.Amount < 0).Account.Name,
                 Amount = Math.Abs(j.Transactions.First(t => t.Amount < 0).Amount),
                 BudgetId = j.BudgetTransactionJournals.Any() ? j.BudgetTransactionJournals.First().Id : null,
-                BudgetName = j.BudgetTransactionJournals.Any() ? j.BudgetTransactionJournals.First().Budget.Name : null
+                BudgetName = j.BudgetTransactionJournals.Any() ? j.BudgetTransactionJournals.First().Budget.Name : null,
+                TransactionTypeId = j.TransactionTypeId,
+                TransactionType = j.TransactionType.Type
             });
     }
 }

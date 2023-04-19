@@ -9,7 +9,11 @@ public class FormattedTransaction
 
     [Key]
     public uint JournalId { get; set; }
-    public string JournalDescription { get; set; }
+    public required string JournalDescription { get; set; }
+
+    public uint TransactionTypeId { get; set; }
+    public required string TransactionType { get; set; }
+
     public DateTime JournalDate { get; set; }
     public uint SourceAccountId { get; set; }
     public string SourceAccountName { get; set; }
