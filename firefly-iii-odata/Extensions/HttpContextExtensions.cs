@@ -4,8 +4,8 @@ namespace firefly_iii_odata.Extensions;
 
 public static class HttpContextExtensions
 {
-    public static int FireflyUserId(this HttpContext? context)
-        => int.TryParse(
+    public static uint FireflyUserId(this HttpContext? context)
+        => uint.TryParse(
             context?.User.Identity?.Name ?? throw new Exception("Could not find user name from HttpContext"),
             out var userId
         )

@@ -112,14 +112,23 @@ app.Run();
 IEdmModel GetEdmModel()
 {
     var builder = new ODataConventionModelBuilder();
-    builder.EntitySet<Budget>("RawBudgets");
-    builder.EntitySet<Transaction>("RawTransactions");
-    builder.EntitySet<BudgetLimit>("RawBudgetLimits");
-    builder.EntitySet<Account>("Rawccounts");
-    builder.EntitySet<AccountType>("RawAccountTypes");
-    builder.EntitySet<TransactionType>("RawTransactionTypes");
-    builder.EntitySet<FormattedTransaction>("Transactions");
-    builder.EntitySet<FormattedAccount>("Accounts");
-    builder.EntitySet<FormattedBudgetLimit>("BudgetLimits");
+    builder.EntitySet<Budget>("Budgets")
+        .Binding
+        .HasManyPath(b => b.AutoBudgets);
+
+    var transactionSet = builder.EntitySet<Transaction>("Transactions");
+    transactionSet.Binding.HasSinglePath(t => t.TransactionJournal);
+    transactionSet.Binding.HasSinglePath(t => t.TransactionCurrency);
+
+    builder.EntitySet<BudgetLimit>("BudgetLimits");
+
+    builder.EntitySet<Account>("Accounts")
+        .Binding
+        .HasSinglePath(a => a.AccountType);
+
+    builder.EntitySet<TransactionType>("TransactionTypes");
+    builder.EntitySet<FormattedTransaction>("FormattedTransactions");
+    builder.EntitySet<FormattedAccount>("FormattedAccounts");
+    builder.EntitySet<FormattedBudgetLimit>("FormattedBudgetLimits");
     return builder.GetEdmModel();
 }

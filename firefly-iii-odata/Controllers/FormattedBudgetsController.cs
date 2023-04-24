@@ -6,18 +6,18 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace firefly_iii_odata.Controllers;
 
-public class RawTransactionsController : ODataController
+public class FormattedBudgetsController : ODataController
 {
     private readonly FireflyContext _dbContext;
 
-    public RawTransactionsController(FireflyContext dbContext)
+    public FormattedBudgetsController(FireflyContext dbContext)
     {
         _dbContext = dbContext;
     }
 
     [EnableQuery]
-    public IQueryable<Transaction> Get()
+    public IQueryable<Budget> Get()
     {
-        return _dbContext.Transactions.Where(t => t.TransactionJournal.UserId == HttpContext.FireflyUserId()); ;
+        return _dbContext.Budgets.Where(b => b.UserId == HttpContext.FireflyUserId());;
     }
 }

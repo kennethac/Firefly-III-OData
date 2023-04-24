@@ -7,7 +7,9 @@ public class FormattedBudgetLimit
     public required string BudgetName { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
+    public bool? RollsOver { get; set; }
     public string? Period { get; set; }
-    public decimal Amount { get; set; }
-    public decimal Spent { get; set; }
+    public decimal? PeriodAmount { get; set; }
+    public decimal CurrentPeriodAmount { get; set; }
+    public decimal CurrentPeriodSpent { get; set; }
 }

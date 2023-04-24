@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace firefly_iii_odata.Controllers;
 
-public class RawTransactionTypesController : ODataController
+public class TransactionTypesController : ODataController
 {
     private readonly FireflyContext _dbContext;
 
-    public RawTransactionTypesController(FireflyContext dbContext)
+    public TransactionTypesController(FireflyContext dbContext)
     {
         _dbContext = dbContext;
     }

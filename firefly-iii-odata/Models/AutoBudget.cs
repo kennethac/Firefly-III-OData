@@ -25,5 +25,5 @@ public partial class AutoBudget
 
     public virtual Budget Budget { get; set; } = null!;
 
-    public virtual TransactionCurrency TransactionCurrency { get; set; } = null!;
+    public virtual TransactionCurrency? TransactionCurrency { get; set; } = null!;
 }
